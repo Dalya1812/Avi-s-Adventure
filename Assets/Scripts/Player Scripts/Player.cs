@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, System.IComparable<Player>
 {
-	readonly Vector2 InitialPosition = new Vector2(-8, 3.5f);
+	Vector2 initialPosition;
 	Movement movementM;
 	CoinCollection collectibleM;
 	Perceptron brainM;
@@ -19,7 +19,7 @@ public class Player : MonoBehaviour, System.IComparable<Player>
 	{
 
 		timer = GetComponent<Timer>();
-		transform.position = InitialPosition;
+		initialPosition = transform.position;
 		movementM = GetComponent<Movement>();
 		movementM.InitSelf();
 
@@ -33,7 +33,7 @@ public class Player : MonoBehaviour, System.IComparable<Player>
 
 	public void ResetPosition()
 	{
-		transform.position = InitialPosition;
+		transform.position = initialPosition;
 	}
 
     public void Win()

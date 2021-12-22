@@ -15,9 +15,20 @@ public class Population
 		m_PopulationSize = i_PopulationSize;
 		player = i_Player;
 
-		initPopulation();
+		//initPopulation();
 	}
 
+	public void altInitPopulation(Vector2[] positions)
+	{
+			pop = new List<Player>();
+			for (int i = 0; i < positions.Length; i++)
+			{
+				Player p = GameObject.Instantiate(player, positions[i], Quaternion.identity).GetComponent<Player>();
+				p.InitSelf();
+				p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+				pop.Add(p);
+			}
+	}
 	private void initPopulation()
 	{
 		pop = new List<Player>();

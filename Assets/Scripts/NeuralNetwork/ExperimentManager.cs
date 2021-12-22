@@ -9,16 +9,39 @@ public class ExperimentManager : MonoBehaviour
 	int currentIndex;
 	[SerializeField] int populationSize;
 	[SerializeField] GameObject player;
+	List<GameObject> rooms;
 
 	private void Start()
 	{
+		rooms = new List<GameObject>(GameObject.FindGameObjectsWithTag("Room"));
 		timer = GetComponent<Timer>();
 		currentIndex = 0;
-		population = new Population(0.2f, populationSize, player);
+		population = new Population(0.2f, rooms.Count, player);
+		List<Vector2> positions = new List<Vector2>();
+		foreach(GameObject g in rooms)
+		{
+			GameObject pos;
+			foreach(Transform t in g.transform)
+			{
+				if (t.CompareTag("Respawn"))
+				{
+					pos = t.gameObject;
+					positions.Add(pos.transform.position);
+				}
+			}
 
-		population[0].Run();
-		//RunSingleGeneration();
-		timer.Fire(5, RunSingleGeneration);
+			
+		}
+
+		print("Vector count: " + positions.Count);
+		foreach(Vector2 v in positions)
+		{
+			print(v);
+		}
+
+		population.altInitPopulation(positions.ToArray());
+		//population[0].Run();
+		//timer.Fire(5, RunSingleGeneration);
 
 	}
 
