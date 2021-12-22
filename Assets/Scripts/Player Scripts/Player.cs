@@ -2,16 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, System.IComparable<Player>
 {
+	readonly Vector2 InitialPosition = new Vector2(-8, 3.5f);
 	Movement movementM;
 	CoinCollection collectibleM;
 	Perceptron brainM;
 	Timer timer;
+
+	public float Fitness
+	{
+		get { return brainM.Fitness; }
+		set { brainM.Fitness = value; }
+	}
 	public void InitSelf()
 	{
+
 		timer = GetComponent<Timer>();
-		transform.position = new Vector2(-8, 3.5f);
+		transform.position = InitialPosition;
 		movementM = GetComponent<Movement>();
 		movementM.InitSelf();
 
@@ -21,6 +29,11 @@ public class Player : MonoBehaviour
 		brainM.InitSelf();
 
 		SetMovementBasedOnGuess();
+	}
+
+	public void ResetPosition()
+	{
+		transform.position = InitialPosition;
 	}
 
     public void Win()
@@ -50,5 +63,16 @@ public class Player : MonoBehaviour
 	public void Stop()
 	{
 		movementM.canRun = false;
+	}
+
+	public int CompareTo(Player other)
+	{
+		Perceptron brain2 = other.GetComponent<Perceptron>();
+		return brainM.CompareTo(brain2);
+	}
+
+	public void LoadBrain(float[] i_NewWeights)
+	{
+		brainM.InitFromOther(i_NewWeights);
 	}
 }

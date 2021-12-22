@@ -1347,6 +1347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c61a2a652e37964b918d2948a641426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  populationSize: 2
   player: {fileID: 1226815901677885902, guid: 40c10436950f4ce4dabd43c12f18b59b, type: 3}
 --- !u!1001 &1068892088
 PrefabInstance:

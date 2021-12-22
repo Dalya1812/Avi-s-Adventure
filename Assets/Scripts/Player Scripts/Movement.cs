@@ -32,12 +32,6 @@ public class Movement : MonoBehaviour
 
     public void SetMovementVector(Vector2 i_Vec)
 	{
-        if (vectorFromBrain != i_Vec)
-        {
-            print("Different!");
-        }
-
-        else print("Same!");
         vectorFromBrain = i_Vec;
 	}
 

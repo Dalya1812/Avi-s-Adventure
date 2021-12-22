@@ -25,7 +25,23 @@ public class Population
 		{
 			Player p = GameObject.Instantiate(player).GetComponent<Player>();
 			p.InitSelf();
+			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
 			pop.Add(p);
+		}
+	}
+
+	public void ResetPopulation()
+	{
+		foreach(Player p in pop)
+		{
+			p.ResetPosition();
+		}
+
+		for (int i = 0; i < m_PopulationSize; i++)
+		{
+			Player p = GameObject.Instantiate(player).GetComponent<Player>();
+			p.InitSelf();
+			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
 		}
 	}
 
@@ -40,9 +56,6 @@ public class Population
 		return pop.Count;
 	}
 
-
-
-
 	public void Mutate()
 	{
 		foreach(Player p in pop)
@@ -54,24 +67,53 @@ public class Population
 	public void CrossOver()
 	{
 		List<Player> temp = new List<Player>();
-		pop.Sort();
-		for(int i = 0; i < m_PopulationSize/4; i++)
+		for(int i = 0; i < m_PopulationSize; i++)
 		{
-			temp.Add(pop[pop.Count -  1 - i]);
+			temp.Add(ThreeWayTournement());
 		}
 
-		int currentSize = temp.Count;
-		for(int i = 0; i < currentSize; i++)
+		List<float[]> weights = new List<float[]>();
+		foreach (Player p in temp)
 		{
-			for(int j = 0; j < 3; j++)
-			{
-				temp.Add(temp[i]);
-			}
+		//	brains.Add(p.GetComponent<Perceptron>().CloneWithType());
+			weights.Add(p.GetComponent<Perceptron>().weights);
 		}
 
-		pop = temp;
+		foreach(Player p in pop)
+		{
+			GameObject.Destroy(p.gameObject);
+		}
+
+		foreach(Player p in temp)
+		{
+			GameObject.Destroy(p.gameObject);
+		}
+
+		pop.Clear();
+		temp.Clear();
+
+		for(int i = 0; i < m_PopulationSize; i++)
+		{
+			Player p = GameObject.Instantiate(player).GetComponent<Player>();
+			p.InitSelf();
+			p.LoadBrain(weights[i]);
+			pop.Add(p);
+			//comment
+		}
 	}
 
+	private Player ThreeWayTournement()
+	{
+		Player p1 = pop[Random.Range(0, pop.Count)];
+		Player p2 = pop[Random.Range(0, pop.Count)];
+		Player p3 = pop[Random.Range(0, pop.Count)];
 
+		return Fitter(Fitter(p1, p2), p3);
+	}
+
+	private Player Fitter(Player i_Player1, Player i_Player2)
+	{
+		return (i_Player1.Fitness > i_Player2.Fitness ? i_Player1 : i_Player2);
+	}
 
 }

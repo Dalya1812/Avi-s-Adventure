@@ -7,16 +7,18 @@ public class ExperimentManager : MonoBehaviour
 	Population population;
 	Timer timer;
 	int currentIndex;
+	[SerializeField] int populationSize;
 	[SerializeField] GameObject player;
 
 	private void Start()
 	{
 		timer = GetComponent<Timer>();
 		currentIndex = 0;
-		population = new Population(0.1f, 10, player);
+		population = new Population(0.2f, populationSize, player);
 
-		RunSingle();
-		//timer.Fire(1, RunSingle);
+		population[0].Run();
+		//RunSingleGeneration();
+		timer.Fire(5, RunSingleGeneration);
 
 	}
 
@@ -32,7 +34,7 @@ public class ExperimentManager : MonoBehaviour
 			return true;
 		}
 	}
-	public void RunSingle()
+	public void RunSingleGeneration()
 	{
 		Player temp = population[currentIndex++];
 		temp.Stop();
@@ -40,7 +42,22 @@ public class ExperimentManager : MonoBehaviour
 		if (!isGenerationTested())
 		{
 			population[currentIndex].Run();
-			timer.Fire(5, RunSingle);
+			timer.Fire(3, RunSingleGeneration);
 		}
+
+		else
+		{
+			RunGeneticOperators();
+		}
+
+	}
+
+	public void RunGeneticOperators()
+	{
+		population.CrossOver();
+		population.Mutate();
+		population.ResetPopulation();
+		currentIndex = 0;
+		RunSingleGeneration();
 	}
 }

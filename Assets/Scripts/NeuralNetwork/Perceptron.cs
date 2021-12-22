@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopulationElement, System.ICloneable
 {
-	float[] weights;
+	public float[] weights;
 	float m_Fitness;
 
 	public float Fitness 
@@ -107,5 +107,14 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 	public Perceptron CloneWithType()
 	{
 		return (Perceptron)Clone();
+	}
+
+	public void InitFromOther(float[] i_Other)
+	{
+		for(int i = 0; i < weights.Length; i++)
+		{
+			weights[i] = i_Other[i];
+		}
+
 	}
 }
