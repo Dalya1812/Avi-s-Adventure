@@ -7,21 +7,24 @@ public class ExperimentManager : MonoBehaviour
 	Population population;
 	Timer timer;
 	int currentIndex;
+	bool canRun;
 	[SerializeField] int populationSize;
 	[SerializeField] GameObject player;
 	List<GameObject> rooms;
+	List<Vector2> positions;
 
 	private void Start()
 	{
+		canRun = true;
 		rooms = new List<GameObject>(GameObject.FindGameObjectsWithTag("Room"));
 		timer = GetComponent<Timer>();
 		currentIndex = 0;
 		population = new Population(0.2f, rooms.Count, player);
-		List<Vector2> positions = new List<Vector2>();
-		foreach(GameObject g in rooms)
+		positions = new List<Vector2>();
+		foreach (GameObject g in rooms)
 		{
 			GameObject pos;
-			foreach(Transform t in g.transform)
+			foreach (Transform t in g.transform)
 			{
 				if (t.CompareTag("Respawn"))
 				{
@@ -30,21 +33,41 @@ public class ExperimentManager : MonoBehaviour
 				}
 			}
 
-			
+
 		}
 
-		print("Vector count: " + positions.Count);
-		foreach(Vector2 v in positions)
-		{
-			print(v);
-		}
+		population.altInitPopulation(positions.ToArray(), rooms.ToArray());
 
-		population.altInitPopulation(positions.ToArray());
-		//population[0].Run();
-		//timer.Fire(5, RunSingleGeneration);
+		RunAll();
 
 	}
 
+	private void RunAll()
+	{
+		for (int i = 0; i < population.Size(); i++)
+		{
+			population[i].transform.parent = rooms[i].transform;
+			population[i].Run();
+		}
+	}
+
+	private void Update()
+	{
+		if (canRun)
+		{
+			for (int i = 0; i < population.Size(); i++)
+			{
+				if (population[i].GetComponent<Rigidbody2D>().velocity != Vector2.zero)
+				{
+					return;
+				}
+			}
+
+			canRun = false;
+			timer.Fire(0.5f, ApplyGeneticOperators);
+
+		}
+	}
 	public bool isGenerationTested()
 	{
 		if (currentIndex < population.Size())
@@ -70,17 +93,18 @@ public class ExperimentManager : MonoBehaviour
 
 		else
 		{
-			RunGeneticOperators();
+			ApplyGeneticOperators();
 		}
 
 	}
 
-	public void RunGeneticOperators()
+	public void ApplyGeneticOperators()
 	{
 		population.CrossOver();
 		population.Mutate();
-		population.ResetPopulation();
-		currentIndex = 0;
-		RunSingleGeneration();
+		population.RegeneratePopulation();
+		canRun = true;
+		RunAll();
+		
 	}
 }

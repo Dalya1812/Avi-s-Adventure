@@ -41,31 +41,34 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 			sum += weights[i] * positionArray[i];
 		}
 
-		float result = (float) Tanh((double)sum);
+		float bias = 0.3f;
+		float result = (float) Sin((double)sum);
 		
 		//LEFT
 		if (result >= -1f && result < -0.5f)
 		{
-			answer = new Vector2(-1f, 0);
+			answer = Vector2.left;
 		}
 
 		//RIGHT
 		else if (result >= -0.5f && result < 0)
 		{
-			answer = new Vector2(1, 0);
+			answer = Vector2.right;
 		}
 
 		//UP
 		else if (result >= 0 && result < 0.5f)
 		{
-			answer = new Vector2(0, 1);
+			answer = Vector2.up;
 		}
 
 		//DOWN
 		else if (result >= 0.5f && result <= 1f)
 		{
-			answer = new Vector2(0, -1);
+			answer = Vector2.down;
 		}
+
+		Debug.Log("Answer is: " + answer);
 
 		return answer;
 	}

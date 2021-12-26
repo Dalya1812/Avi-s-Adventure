@@ -5,7 +5,7 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     float horizontal, vertical;
-    public bool canRun;
+    public bool canRun = true;
     Vector2 vectorFromBrain;
 
     [SerializeField] float speedModifier;
@@ -45,9 +45,8 @@ public class Movement : MonoBehaviour
 
     public void ApplyMovement(Vector2 i_Input)
 	{
-
+        print("Got to ApplyMovement with " +i_Input);
         Vector2 movement = i_Input * speedModifier * Time.deltaTime;
-        print(i_Input);
         rb.MovePosition((Vector2)transform.position + movement);
 	}
 }
