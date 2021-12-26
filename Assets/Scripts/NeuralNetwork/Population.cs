@@ -5,8 +5,10 @@ using UnityEngine;
 public class Population
 {
 	List<Player> pop;
+	List<PlayerInfo> newGenerationInfo;
 	[SerializeField] float m_MutationRate;
 	[SerializeField] int m_PopulationSize;
+	GameObject[] rooms;
 	GameObject player;
 
 	public Population(float i_MutationRate, int i_PopulationSize, GameObject i_Player)
@@ -15,7 +17,27 @@ public class Population
 		m_PopulationSize = i_PopulationSize;
 		player = i_Player;
 
-		initPopulation();
+		//initPopulation();
+	}
+
+	public void altInitPopulation(Vector2[] positions, GameObject[] rooms)
+	{
+		pop = new List<Player>();
+		this.rooms = rooms;
+		InitPopulationElements(positions, rooms);
+	}
+
+	private void InitPopulationElements(Vector2[] positions, GameObject[] rooms)
+	{
+		for (int i = 0; i < positions.Length; i++)
+		{
+			Player p = GameObject.Instantiate(player).GetComponent<Player>();
+			p.transform.parent = rooms[i].transform;
+			p.transform.position = positions[i];
+			p.InitSelf();
+			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+			pop.Add(p);
+		}
 	}
 
 	private void initPopulation()
@@ -25,23 +47,8 @@ public class Population
 		{
 			Player p = GameObject.Instantiate(player).GetComponent<Player>();
 			p.InitSelf();
-			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
 			pop.Add(p);
-		}
-	}
-
-	public void ResetPopulation()
-	{
-		foreach(Player p in pop)
-		{
-			p.ResetPosition();
-		}
-
-		for (int i = 0; i < m_PopulationSize; i++)
-		{
-			Player p = GameObject.Instantiate(player).GetComponent<Player>();
-			p.InitSelf();
-			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
 		}
 	}
 
@@ -58,47 +65,55 @@ public class Population
 
 	public void Mutate()
 	{
-		foreach(Player p in pop)
+		foreach(PlayerInfo p in newGenerationInfo)
 		{
-			p.Mutate(m_MutationRate);
+			p.Mutate(0.5f);
 		}
+
+		//foreach(Player p in pop)
+		//{
+		//	p.Mutate(m_MutationRate);
+		//}
 	}
 
 	public void CrossOver()
 	{
+		newGenerationInfo = new List<PlayerInfo>();
 		List<Player> temp = new List<Player>();
 		for(int i = 0; i < m_PopulationSize; i++)
 		{
 			temp.Add(ThreeWayTournement());
 		}
 
-		List<float[]> weights = new List<float[]>();
-		foreach (Player p in temp)
-		{
-		//	brains.Add(p.GetComponent<Perceptron>().CloneWithType());
-			weights.Add(p.GetComponent<Perceptron>().weights);
-		}
-
-		foreach(Player p in pop)
-		{
-			GameObject.Destroy(p.gameObject);
-		}
-
+		List<PlayerInfo> newPop = new List<PlayerInfo>();
 		foreach(Player p in temp)
 		{
-			GameObject.Destroy(p.gameObject);
+			newGenerationInfo.Add(p.GetInfo());
 		}
 
-		pop.Clear();
+		//Destroying the old generation.
+
+		for(int i = 0; i < temp.Count; i++)
+		{
+			GameObject.Destroy(temp[i].gameObject);
+			GameObject.Destroy(pop[i].gameObject);
+		}
+
 		temp.Clear();
+		pop.Clear();
+	}
+
+	internal void RegeneratePopulation()
+	{
+		pop = new List<Player>();
 
 		for(int i = 0; i < m_PopulationSize; i++)
 		{
 			Player p = GameObject.Instantiate(player).GetComponent<Player>();
 			p.InitSelf();
-			p.LoadBrain(weights[i]);
+			p.LoadProperties(newGenerationInfo[i], rooms[i]);
+
 			pop.Add(p);
-			//comment
 		}
 	}
 
