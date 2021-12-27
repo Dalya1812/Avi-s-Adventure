@@ -11,7 +11,8 @@ public class CoinCollection : MonoBehaviour
 	{
 		if (collision.CompareTag("Coin"))
 		{
-			Fitness += 10;
+			GetComponent<Player>().Fitness += 10;
+			//Fitness += 10;
 			Destroy(collision.gameObject);
 		}
 	}

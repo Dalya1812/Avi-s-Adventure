@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using static System.Math;
 using UnityEngine;
 
-public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopulationElement, System.ICloneable
+public class Perceptron : System.ICloneable
 {
 	public float[] weights;
 	float m_Fitness;
@@ -14,7 +14,7 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 		set { m_Fitness = value; }
 	}
 
-	public void InitSelf()
+	public Perceptron()
 	{
 		initWeights();
 	}
@@ -25,9 +25,23 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 		weights = new float[2];
 		for (int i = 0; i < weights.Length; i++)
 		{
-			weights[i] = Random.Range(-1f, 1f);
+			weights[i] = Random.Range(-3f, 3f);
 		}
 	}
+
+	public float AltGuess(Vector2 i_Position)
+	{
+		float sum = 0;
+		float[] vector = Vector2Array(i_Position);
+		for (int i = 0; i < weights.Length; i++)
+		{
+			sum += vector[i] * weights[i];
+		}
+
+		return (float)Tanh(sum);
+
+	}
+
 
 	public Vector2 Guess(Vector2 position)
 	{
@@ -36,14 +50,14 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 		float[] positionArray = Vector2Array(position);
 
 		float sum = 0;
-		for(int i = 0; i < weights.Length; i++)
+		for (int i = 0; i < weights.Length; i++)
 		{
 			sum += weights[i] * positionArray[i];
 		}
 
 		float bias = 0.3f;
-		float result = (float) Sin((double)sum);
-		
+		float result = (float)Sin((double)sum);
+
 		//LEFT
 		if (result >= -1f && result < -0.5f)
 		{
@@ -83,21 +97,26 @@ public class Perceptron : MonoBehaviour, System.IComparable<Perceptron>, IPopula
 		return new float[] { i_Vector.x, i_Vector.y };
 	}
 
-	public void Mutate(float i_MutationRate)
+	public Color Mutate(float i_MutationRate)
 	{
+		Color color = new Color(0, 0, 0);
 		for(int i = 0; i < weights.Length; i++)
 		{
-			if (Random.Range(0,1f) < i_MutationRate)
+			if (Random.Range(0, 1f) <= i_MutationRate)
 			{
-				weights[i] += Random.Range(-0.5f, 0.5f);
+				weights[i] += Random.Range(-1f, 1f);
+				color.r += Random.Range(-0.1f, 0.1f);
+				color.g += Random.Range(-0.1f, 0.1f);
+				color.b += Random.Range(-0.1f, 0.1f);
 			}
 		}
+		return color;
 	}
 
-	public int CompareTo(Perceptron other)
-	{
-		return (int) (Mathf.Sign(this.Fitness - other.Fitness));
-	}
+	//public int CompareTo(Perceptron other)
+	//{
+	//	return (int) (Mathf.Sign(this.Fitness - other.Fitness));
+	//}
 
 	public object Clone()
 	{

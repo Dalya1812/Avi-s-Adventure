@@ -6,15 +6,26 @@ using UnityEngine;
 public struct PlayerInfo
 {
 	public float[] weights;
+	public Perceptron[] perceptrons;
 	public Vector3 localPosition;
 	public Color color;
 	public Transform parent;
+
+	public PlayerInfo(Perceptron[] i_Perceptrons, Vector3 i_LocalPosition, Color i_Color)
+	{
+		weights = null;
+		perceptrons = i_Perceptrons;
+		localPosition = i_LocalPosition;
+		color = i_Color;
+		parent = null;
+	}
 
 	public PlayerInfo(float[] i_Weights, Vector3 i_LocalPosition, Color i_Color, Transform i_Parent)
 	{
 		this.weights = i_Weights;
 		this.color = i_Color;
 		this.parent = i_Parent;
+		perceptrons = null;
 		this.localPosition = i_LocalPosition;
 	}
 
@@ -34,11 +45,11 @@ public struct PlayerInfo
 	{
 		float chance = Random.Range(0, 1f);
 		Color mutatedAddition = new Color(0, 0, 0);
-		for(int i = 0; i < weights.Length; i++)
+		for(int i = 0; i < perceptrons.Length; i++)
 		{
 			if (chance <= i_MutationChance)
 			{
-				weights[i] += Random.Range(-0.5f, 0.5f);
+				perceptrons[i].Mutate(i_MutationChance);
 				mutatedAddition.r += Random.Range(-0.2f, 0.2f);
 				mutatedAddition.g += Random.Range(-0.2f, 0.2f);
 				mutatedAddition.b += Random.Range(-0.2f, 0.2f);
@@ -48,19 +59,15 @@ public struct PlayerInfo
 		color += mutatedAddition;
 	}
 }
-public class Player : MonoBehaviour, System.IComparable<Player>
+public class Player : MonoBehaviour
 {
 	Vector2 initialPosition;
 	Movement movementM;
 	CoinCollection collectibleM;
-	Perceptron brainM;
+	NeuralNetwork brainM;
 	Timer timer;
 
-	public float Fitness
-	{
-		get { return brainM.Fitness; }
-		set { brainM.Fitness = value; }
-	}
+	public float Fitness { get; set; }
 	public void InitSelf()
 	{
 
@@ -70,7 +77,7 @@ public class Player : MonoBehaviour, System.IComparable<Player>
 
 		collectibleM = GetComponent<CoinCollection>();
 		
-		brainM = GetComponent<Perceptron>();
+		brainM = GetComponent<NeuralNetwork>();
 		brainM.InitSelf();
 
 		//SetMovementBasedOnGuess();
@@ -89,15 +96,17 @@ public class Player : MonoBehaviour, System.IComparable<Player>
 
 	public void SetMovementBasedOnGuess()
 	{
-		Vector2 guess = brainM.Guess(transform.localPosition);
+		Vector2 guess = brainM.GenerateOutput(transform.localPosition);
+	
 		movementM.SetMovementVector(guess);
-		timer.Fire(1, SetMovementBasedOnGuess);
+		timer.Fire(0.1f, SetMovementBasedOnGuess);
 	}
 
 	public void Run()
 	{
 		movementM.canRun = true;
-		timer.Fire(1, SetMovementBasedOnGuess);
+
+		SetMovementBasedOnGuess();
 	}
 
 	public void Stop()
@@ -105,31 +114,27 @@ public class Player : MonoBehaviour, System.IComparable<Player>
 		movementM.canRun = false;
 	}
 
-	public int CompareTo(Player other)
-	{
-		Perceptron brain2 = other.GetComponent<Perceptron>();
-		return brainM.CompareTo(brain2);
-	}
-
 	public void LoadProperties(PlayerInfo i_Info, GameObject i_Room)
 	{
-		brainM.InitFromOther(i_Info.weights);
-		//print(i_Info);	
+		brainM.InitFromOther(i_Info.perceptrons);
 		GetComponent<SpriteRenderer>().color = i_Info.color;
 		transform.parent = i_Room.transform;
 		transform.localPosition = new Vector3(-9.6f, 5.4f, 0f);
-
-		//foreach(Transform child in i_Room.transform)
-		//{
-
-		//}
 	}
 
 	public PlayerInfo GetInfo()
 	{
 		Color color = GetComponent<SpriteRenderer>().color;
-		Transform parent = transform.parent;
-		PlayerInfo p = new PlayerInfo((float[])brainM.weights.Clone(), transform.localPosition, color, parent);
+		PlayerInfo p = new PlayerInfo(brainM.GetPerceptrons(), transform.localPosition, color);
 		return p;
+
+		//Transform parent = transform.parent;
+		//PlayerInfo p = new PlayerInfo((float[])brainM.weights.Clone(), transform.localPosition, color, parent);
+
+	}
+
+	public bool HasStopped()
+	{
+		return movementM.hasStopped;
 	}
 }

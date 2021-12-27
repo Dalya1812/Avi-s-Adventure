@@ -40,18 +40,6 @@ public class Population
 		}
 	}
 
-	private void initPopulation()
-	{
-		pop = new List<Player>();
-		for (int i = 0; i < m_PopulationSize; i++)
-		{
-			Player p = GameObject.Instantiate(player).GetComponent<Player>();
-			p.InitSelf();
-			p.GetComponent<SpriteRenderer>().color = new Color(Random.Range(0.5f, 1f), Random.Range(0.5f, 1f), Random.Range(0.5f, 1f));
-			pop.Add(p);
-		}
-	}
-
 	public Player this[int i]
 	{
 		get { return pop[i]; }
@@ -65,15 +53,11 @@ public class Population
 
 	public void Mutate()
 	{
-		foreach(PlayerInfo p in newGenerationInfo)
-		{
-			p.Mutate(0.5f);
-		}
 
-		//foreach(Player p in pop)
-		//{
-		//	p.Mutate(m_MutationRate);
-		//}
+		foreach(Player p in pop)
+		{
+			p.Mutate(0.1f);
+		}
 	}
 
 	public void CrossOver()
@@ -117,6 +101,13 @@ public class Population
 		}
 	}
 
+
+	private Player TwoWayTournement()
+	{
+		Player p1 = pop[Random.Range(0, pop.Count)];
+		Player p2 = pop[Random.Range(0, pop.Count)];
+		return Fitter(p1, p2);
+	}
 	private Player ThreeWayTournement()
 	{
 		Player p1 = pop[Random.Range(0, pop.Count)];
@@ -131,4 +122,17 @@ public class Population
 		return (i_Player1.Fitness > i_Player2.Fitness ? i_Player1 : i_Player2);
 	}
 
+	public float ShowFittest()
+	{
+		float max = 0;
+		foreach(Player p in pop)
+		{
+			if (p.Fitness > max)
+			{
+				max = p.Fitness;
+			}
+		}
+
+		return max;
+	}
 }

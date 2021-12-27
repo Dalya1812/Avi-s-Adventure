@@ -39,6 +39,7 @@ public class ExperimentManager : MonoBehaviour
 		population.altInitPopulation(positions.ToArray(), rooms.ToArray());
 
 		RunAll();
+		timer.Fire(10f, ApplyGeneticOperators);
 
 	}
 
@@ -46,65 +47,94 @@ public class ExperimentManager : MonoBehaviour
 	{
 		for (int i = 0; i < population.Size(); i++)
 		{
-			population[i].transform.parent = rooms[i].transform;
+			//population[i].transform.parent = rooms[i].transform;
 			population[i].Run();
 		}
+		//timer.Fire(1f, ApplyGeneticOperators);
 	}
 
 	private void Update()
 	{
+
+		//if(Input.GetKeyDown(KeyCode.U))
+		//{
+		//	Time.timeScale += 1;
+		//}
+
+		//if (Input.GetKeyDown(KeyCode.D))
+		//{
+		//	Time.timeScale -= 1;
+		//}
+
 		if (canRun)
 		{
 			for (int i = 0; i < population.Size(); i++)
 			{
-				if (population[i].GetComponent<Rigidbody2D>().velocity != Vector2.zero)
+				//if (population[i].GetComponent<Rigidbody2D>().velocity != Vector2.zero)
+				if(!population[i].HasStopped())
 				{
 					return;
 				}
 			}
 
 			canRun = false;
-			timer.Fire(0.5f, ApplyGeneticOperators);
-
-		}
-	}
-	public bool isGenerationTested()
-	{
-		if (currentIndex < population.Size())
-		{
-			return false;
-		}
-
-		else
-		{
-			return true;
-		}
-	}
-	public void RunSingleGeneration()
-	{
-		Player temp = population[currentIndex++];
-		temp.Stop();
-		print(population[currentIndex - 1].GetInstanceID() + " Stopped");
-		if (!isGenerationTested())
-		{
-			population[currentIndex].Run();
-			timer.Fire(3, RunSingleGeneration);
-		}
-
-		else
-		{
+			timer.Stop();
 			ApplyGeneticOperators();
+			//timer.Fire(0.1f, ApplyGeneticOperators);
 		}
-
 	}
+
 
 	public void ApplyGeneticOperators()
 	{
+		print(population.ShowFittest());
 		population.CrossOver();
-		population.Mutate();
 		population.RegeneratePopulation();
+		population.Mutate();
+		ResetRooms();
 		canRun = true;
 		RunAll();
+		timer.Fire(10f, ApplyGeneticOperators);
 		
 	}
+
+	public void ResetRooms()
+	{
+		foreach(GameObject room in rooms)
+		{
+			room.GetComponent<Level>().RegenerateContainer();
+		}
+	}
 }
+
+//public bool isGenerationTested()
+//{
+//	if (currentIndex < population.Size())
+//	{
+//		return false;
+//	}
+
+//	else
+//	{
+//		return true;
+//	}
+//}
+
+
+//public void RunSingleGeneration()
+//{
+//	Player temp = population[currentIndex++];
+//	temp.Stop();
+//	print(population[currentIndex - 1].GetInstanceID() + " Stopped");
+//	if (!isGenerationTested())
+//	{
+//		population[currentIndex].Run();
+//		timer.Fire(3, RunSingleGeneration);
+//	}
+
+//	else
+//	{
+//		ApplyGeneticOperators();
+//	}
+
+//}

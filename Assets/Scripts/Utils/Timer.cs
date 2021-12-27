@@ -16,7 +16,7 @@ public class Timer : MonoBehaviour
 
 	private void tickTime()
 	{
-		if (timeStarted + timerDuration < Time.realtimeSinceStartup)
+		if (timeStarted + (timerDuration * Time.timeScale) < Time.realtimeSinceStartup)
 		{
 			started = false;
 			action.Invoke();
